@@ -148,7 +148,11 @@ export default function GeneratePage() {
     error: completionError,
   } = useCompletion({
     api: "/api/generate",
-    onFinish: () => {
+    onFinish: (_prompt, completion) => {
+      // Parse final completion before stopping stream
+      if (completion) {
+        parseFinalTweets(completion);
+      }
       setIsStreaming(false);
     },
     onError: () => {
@@ -156,11 +160,36 @@ export default function GeneratePage() {
     },
   });
 
+  /* ─── NDJSON parsing helper ─── */
+  const parseTweetsFromText = useCallback((text: string): Tweet[] => {
+    if (!text) return [];
+    const lines = text.split("\n").filter((l) => l.trim());
+    const parsed: Tweet[] = [];
+    for (const line of lines) {
+      try {
+        const obj = JSON.parse(line);
+        if (obj.position && obj.content && obj.type) {
+          parsed.push(obj as Tweet);
+        }
+      } catch {
+        // skip incomplete lines
+      }
+    }
+    return parsed;
+  }, []);
+
+  /* ─── Final parse on completion ─── */
+  const parseFinalTweets = useCallback((text: string) => {
+    const allTweets = parseTweetsFromText(text);
+    if (allTweets.length > 0) {
+      setTweets(allTweets);
+    }
+  }, [parseTweetsFromText]);
+
   /* ─── Progressive NDJSON parsing ─── */
   const parseStreamedTweets = useCallback((text: string) => {
     if (!text) return;
     const lines = text.split("\n").filter((l) => l.trim());
-    // Only parse new lines
     if (lines.length <= parsedLinesRef.current) return;
 
     const newTweets: Tweet[] = [];
@@ -187,10 +216,10 @@ export default function GeneratePage() {
 
   // Parse as completion streams in
   useEffect(() => {
-    if (completion && isStreaming) {
+    if (completion) {
       parseStreamedTweets(completion);
     }
-  }, [completion, isStreaming, parseStreamedTweets]);
+  }, [completion, parseStreamedTweets]);
 
   // Auto-trigger viral score when streaming finishes
   useEffect(() => {
