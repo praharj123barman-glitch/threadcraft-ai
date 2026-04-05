@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.66",
     "@ai-sdk/google": "^3.0.58",
+    "@ai-sdk/groq": "^3.0.33",
     "@ai-sdk/react": "^3.0.148",
     "@anthropic-ai/sdk": "^0.82.0",
     "@auth/prisma-adapter": "^2.11.1",

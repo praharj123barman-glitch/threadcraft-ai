@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGroq } from "@ai-sdk/groq";
 
 export async function GET() {
   try {
     const result = await generateText({
-      model: google("gemini-2.0-flash"),
+      model: createGroq({ apiKey: process.env.GROQ_API_KEY! })("llama-3.3-70b-versatile"),
       prompt: "Say hello in one sentence.",
     });
     return NextResponse.json({ status: "ok", text: result.text });
