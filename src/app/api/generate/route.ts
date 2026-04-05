@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { createGroq } from "@ai-sdk/groq";
+import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -96,7 +96,7 @@ Example output format:
 
   /* ─── Stream from Claude via Vercel AI SDK ─── */
   const result = streamText({
-    model: createGroq({ apiKey: process.env.GROQ_API_KEY! })("llama-3.3-70b-versatile"),
+    model: google("gemini-2.0-flash"),
     system: systemPrompt,
     prompt: userPrompt,
   });
